@@ -6,16 +6,12 @@ const PORT = process.env.PORT || 5000;
 const HOST_NAME = process.env.HOST_NAME || "0.0.0.0";
 const server = http.createServer(app);
 const io = require('socket.io')(server);
-// const chats = require("./Chats");
-// const clients = require("./Clients");
 
 const clients = [];
 
 app.use(express.json());
 
- app.use(cors());
-
-// const clients = {};
+app.use(cors());
 
 io.on('connection', (socket) => {
     console.log('connection', {id: socket.id, time: Date.now()});

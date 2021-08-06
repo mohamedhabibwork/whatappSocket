@@ -1,0 +1,1 @@
+docker build -t node-socket-app . && docker run -p 1111:3000 --env PORT=3000 --name node-socket-app node-socket-app
