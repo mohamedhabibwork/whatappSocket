@@ -6,8 +6,10 @@ const PORT = process.env.PORT || 5000;
 const HOST_NAME = process.env.HOST_NAME || "0.0.0.0";
 const server = http.createServer(app);
 const io = require('socket.io')(server);
-const chats = require("./Chats");
-const clients = require("./Clients");
+// const chats = require("./Chats");
+// const clients = require("./Clients");
+
+const clients = [];
 
 app.use(express.json());
 
@@ -19,16 +21,18 @@ io.on('connection', (socket) => {
     console.log('connection', {id: socket.id, time: Date.now()});
 
     socket.on('signin', (id) => {
-        clients.addClient(socket,id);
+        
+        clients[id] = socket;
+
         console.log({
             event: 'signin ',
             id,
-            clients: clients.count(),
+            clients: clients.length,
         });
     });
 
     socket.on('message', async (msg)  => {
-        const client = clients.getByIndex(msg.targetId) || null;
+        let client = clients[msg.targetId] || null;
         if (client) {
             await client.emit('message', msg.message);
             console.log(msg, 'sent')
@@ -38,7 +42,7 @@ io.on('connection', (socket) => {
         console.log({
             event: 'message',
             targetId: msg.targetId,
-            clients: clients.count(),
+            clients: clients.length,
         });
     });
 
@@ -47,18 +51,20 @@ io.on('connection', (socket) => {
         console.log({
             event: 'disconnect',
             _,
-            clients: clients.count(),
+            clients: clients.length,
         });
     });
 
     socket.on('leave', (id) => {
-        if (clients.getByIndex(id)) {
+        
+        if (clients[id]) {
             delete clients[id];
         }
+
         console.log({
             event: 'leave',
             id,
-            clients: clients.count(),
+            clients: clients.length,
         });
 
     })
@@ -69,6 +75,7 @@ app.route('/check').get(((req, res) => {
         message:"Your App Working successfully",
     })
 }))
+
 server.listen(PORT, HOST_NAME, () => {
     console.log(`http://${HOST_NAME}:${PORT}`)
 });
