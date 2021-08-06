@@ -1,6 +1,6 @@
 const express = require('express');
 const http = require('http');
-// const cors = require("cors");
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 5000;
 const HOST_NAME = process.env.HOST_NAME || "0.0.0.0";
@@ -13,7 +13,7 @@ const clients = [];
 
 app.use(express.json());
 
-// app.use(cors());
+ app.use(cors());
 
 // const clients = {};
 
@@ -31,10 +31,10 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on('message', async (msg)  => {
+    socket.on('message', (msg)  => {
         let client = clients[msg.targetId] || null;
         if (client) {
-            await client.emit('message', msg.message);
+            client.emit('message', msg.message);
             console.log(msg, 'sent')
         } else {
             console.log(client);
@@ -42,6 +42,7 @@ io.on('connection', (socket) => {
         console.log({
             event: 'message',
             targetId: msg.targetId,
+            currentId:socket.id,
             clients: clients.length,
         });
     });
